@@ -28,6 +28,7 @@ func _on_coins_changed(_new_total: int) -> void:
 
 func _on_mochi_produced(_type: int, _amount: int) -> void:
 	_update_mochi_display()
+	_update_sell_button()
 
 
 func _on_mochi_sold(_type: int, _amount: int, _coins: int) -> void:
