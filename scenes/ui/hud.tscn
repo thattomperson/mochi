@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 1142.0
+offset_bottom = 40.0
+
+[node name="CoinsLabel" type="Label" parent="TopBar"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "Coins: 0"
+
+[node name="MochiLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mochi: 0"
+
+[node name="BottomBar" type="HBoxContainer" parent="."]
+offset_left = 10.0
+offset_top = 580.0
+offset_right = 560.0
+offset_bottom = 630.0
+
+[node name="SellButton" type="Button" parent="BottomBar"]
+custom_minimum_size = Vector2(200, 40)
+layout_mode = 2
+text = "Sell (nothing)"
+
+[node name="SidePanel" type="VBoxContainer" parent="."]
+offset_left = 800.0
+offset_top = 60.0
+offset_right = 1140.0
+offset_bottom = 600.0
+
+[node name="UpgradeLabel" type="Label" parent="SidePanel"]
+layout_mode = 2
+text = "-- Upgrades --"
+horizontal_alignment = 1
+
+[node name="UpgradePanel" type="VBoxContainer" parent="SidePanel"]
+layout_mode = 2
+
+[node name="Separator" type="HSeparator" parent="SidePanel"]
+layout_mode = 2
+
+[node name="HireButton" type="Button" parent="SidePanel"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Hire Rabbit (25 coins)"
