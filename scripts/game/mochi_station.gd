@@ -65,9 +65,20 @@ func _on_mochi_produced(_mochi_type: int, _amount: int) -> void:
 	_update_display()
 
 
+func get_mochi_per_second() -> float:
+	var rabbits: Array = get_assigned_rabbits()
+	if rabbits.is_empty():
+		return 0.0
+	var production_time: float = get_production_time()
+	if production_time <= 0.0:
+		return 0.0
+	return rabbits.size() / production_time
+
+
 func _update_display() -> void:
 	if has_node("StationLabel"):
 		var rabbits: Array = get_assigned_rabbits()
-		$StationLabel.text = "Station %d\n%d rabbit(s)\nProgress: %.1fs" % [
-			station_index + 1, rabbits.size(), _production_timer
+		var mps: float = get_mochi_per_second()
+		$StationLabel.text = "Station %d\n%d rabbit(s)\n%.2f mochi/s" % [
+			station_index + 1, rabbits.size(), mps
 		]
