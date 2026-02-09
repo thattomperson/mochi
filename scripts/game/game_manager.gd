@@ -36,7 +36,7 @@ func _try_auto_sell() -> void:
 	if 3 not in PlayerData.milestones_reached:
 		return
 	var total_sold: int = 0
-	var total_coins: int = 0
+	var total_coins: float = 0.0
 	for mochi_type in PlayerData.mochi_inventory.keys():
 		var count: int = PlayerData.mochi_inventory[mochi_type]
 		if count <= 0:
@@ -44,8 +44,8 @@ func _try_auto_sell() -> void:
 		var recipe: Dictionary = GameData.get_recipe(mochi_type)
 		if recipe.is_empty():
 			continue
-		var value_per: int = _get_mochi_sell_value(mochi_type)
-		var coins: int = count * value_per
+		var value_per: float = get_mochi_sell_value(mochi_type)
+		var coins: float = count * value_per
 		PlayerData.remove_mochi(mochi_type, count)
 		PlayerData.add_coins(coins)
 		Events.mochi_sold.emit(mochi_type, count, coins)
@@ -53,14 +53,14 @@ func _try_auto_sell() -> void:
 		total_coins += coins
 
 
-func sell_all_mochi() -> int:
-	var total_coins: int = 0
+func sell_all_mochi() -> float:
+	var total_coins: float = 0.0
 	for mochi_type in PlayerData.mochi_inventory.keys():
 		var count: int = PlayerData.mochi_inventory[mochi_type]
 		if count <= 0:
 			continue
-		var value_per: int = _get_mochi_sell_value(mochi_type)
-		var coins: int = count * value_per
+		var value_per: float = get_mochi_sell_value(mochi_type)
+		var coins: float = count * value_per
 		PlayerData.remove_mochi(mochi_type, count)
 		PlayerData.add_coins(coins)
 		Events.mochi_sold.emit(mochi_type, count, coins)
@@ -68,11 +68,11 @@ func sell_all_mochi() -> int:
 	return total_coins
 
 
-func _get_mochi_sell_value(mochi_type: int) -> int:
+func get_mochi_sell_value(mochi_type: int) -> float:
 	var recipe: Dictionary = GameData.get_recipe(mochi_type)
 	if recipe.is_empty():
-		return 0
-	var base_value: int = recipe["value"]
+		return 0.0
+	var base_value: float = float(recipe["value"])
 	var value_level: int = PlayerData.get_upgrade_level("mochi_value")
 	var value_mult: float = 1.0 + value_level * GameData.get_upgrade("mochi_value").get("effect_per_level", 0.0)
-	return int(base_value * value_mult)
+	return base_value * value_mult

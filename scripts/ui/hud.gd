@@ -22,7 +22,7 @@ func _ready() -> void:
 	_update_all()
 
 
-func _on_coins_changed(_new_total: int) -> void:
+func _on_coins_changed(_new_total: float) -> void:
 	_update_all()
 
 
@@ -31,7 +31,7 @@ func _on_mochi_produced(_type: int, _amount: int) -> void:
 	_update_sell_button()
 
 
-func _on_mochi_sold(_type: int, _amount: int, _coins: int) -> void:
+func _on_mochi_sold(_type: int, _amount: int, _coins: float) -> void:
 	_update_all()
 
 
@@ -48,7 +48,7 @@ func _on_sell_pressed() -> void:
 
 
 func _on_hire_pressed() -> void:
-	var cost: int = GameData.get_rabbit_hire_cost(PlayerData.rabbits.size())
+	var cost: float = float(GameData.get_rabbit_hire_cost(PlayerData.rabbits.size()))
 	if PlayerData.spend_coins(cost):
 		var rabbit_id: int = PlayerData.add_rabbit(Globals.RabbitRole.WORKER)
 		# Assign to first station by default
@@ -75,7 +75,7 @@ func _on_upgrade_pressed(upgrade_id: String) -> void:
 		return
 	if current_level >= upgrade["max_level"]:
 		return
-	var cost: int = GameData.get_upgrade_cost(upgrade_id, current_level)
+	var cost: float = float(GameData.get_upgrade_cost(upgrade_id, current_level))
 	if PlayerData.spend_coins(cost):
 		PlayerData.set_upgrade_level(upgrade_id, current_level + 1)
 
@@ -89,7 +89,7 @@ func _update_all() -> void:
 
 
 func _update_coins_display() -> void:
-	coins_label.text = "Coins: %d" % PlayerData.coins
+	coins_label.text = "Coins: %.2f" % PlayerData.coins
 
 
 func _update_mochi_display() -> void:
@@ -98,8 +98,9 @@ func _update_mochi_display() -> void:
 		var parts: Array = []
 		for mochi_type in PlayerData.mochi_inventory.keys():
 			var recipe: Dictionary = GameData.get_recipe(mochi_type)
-			var name: String = recipe.get("name", "???")
-			parts.append("%s: %d" % [name, PlayerData.mochi_inventory[mochi_type]])
+			var mochi_name: String = recipe.get("name", "???")
+			var sell_value: float = GameManager.get_mochi_sell_value(mochi_type)
+			parts.append("%s: %d (%.2f ea)" % [mochi_name, PlayerData.mochi_inventory[mochi_type], sell_value])
 		mochi_label.text = "Mochi: " + ", ".join(parts)
 	else:
 		mochi_label.text = "Mochi: 0"
@@ -110,7 +111,11 @@ func _update_sell_button() -> void:
 	var has_auto_sell: bool = 3 in PlayerData.milestones_reached
 	sell_button.visible = not has_auto_sell
 	if total > 0:
-		sell_button.text = "Sell All (%d)" % total
+		var total_value: float = 0.0
+		for mochi_type in PlayerData.mochi_inventory.keys():
+			var count: int = PlayerData.mochi_inventory[mochi_type]
+			total_value += count * GameManager.get_mochi_sell_value(mochi_type)
+		sell_button.text = "Sell All (%d - %.2f coins)" % [total, total_value]
 		sell_button.disabled = false
 	else:
 		sell_button.text = "Sell (nothing)"
@@ -130,11 +135,11 @@ func _update_upgrade_buttons() -> void:
 			btn.disabled = true
 		else:
 			var cost: int = GameData.get_upgrade_cost(upgrade_id, current_level)
-			btn.text = "%s Lv%d (%d coins)" % [upgrade["name"], current_level + 1, cost]
+			btn.text = "%s Lv%d (%.0f coins)" % [upgrade["name"], current_level + 1, float(cost)]
 			btn.disabled = PlayerData.coins < cost
 
 
 func _update_hire_button() -> void:
-	var cost: int = GameData.get_rabbit_hire_cost(PlayerData.rabbits.size())
-	hire_button.text = "Hire Rabbit (%d coins)" % cost
+	var cost: float = float(GameData.get_rabbit_hire_cost(PlayerData.rabbits.size()))
+	hire_button.text = "Hire Rabbit (%.0f coins)" % cost
 	hire_button.disabled = PlayerData.coins < cost

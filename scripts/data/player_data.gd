@@ -3,7 +3,7 @@ extends Node
 ## Runtime player state. Tracks everything the player owns and has earned.
 ## Not persisted yet — save/load comes in Phase 3.
 
-var coins: int = Globals.STARTING_COINS
+var coins: float = Globals.STARTING_COINS
 var current_era: int = Globals.STARTING_ERA
 
 # Mochi inventory: MochiType -> count
@@ -28,12 +28,12 @@ var _next_rabbit_id: int = 0
 var _next_station_id: int = 0
 
 
-func add_coins(amount: int) -> void:
+func add_coins(amount: float) -> void:
 	coins += amount
 	Events.coins_changed.emit(coins)
 
 
-func spend_coins(amount: int) -> bool:
+func spend_coins(amount: float) -> bool:
 	if coins < amount:
 		return false
 	coins -= amount
