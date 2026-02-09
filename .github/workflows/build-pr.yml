@@ -1,6 +1,8 @@
 name: Build PR
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -67,6 +69,18 @@ jobs:
           path: build/web/
           if-no-files-found: error
           retention-days: 14
+
+      - name: Install rsync 📚
+        if: ${{ github.ref == 'main' }}
+        run: |
+          apt-get update && apt-get install -y rsync
+
+      - name: Deploy to GitHub Pages 🚀
+        if: ${{ github.ref == 'main' }}
+        uses: JamesIves/github-pages-deploy-action@releases/v4
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: build/web # The folder the action should deploy.
 
   export-android:
     name: Export Android
