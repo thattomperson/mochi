@@ -118,15 +118,17 @@ func get_upgrade(upgrade_id: String) -> Dictionary:
 	return upgrades.get(upgrade_id, {})
 
 
-func get_upgrade_cost(upgrade_id: String, current_level: int) -> int:
+func get_upgrade_cost(upgrade_id: String, current_level: int) -> Big:
 	var upgrade: Dictionary = get_upgrade(upgrade_id)
 	if upgrade.is_empty():
-		return -1
-	return int(upgrade["base_cost"] * pow(upgrade["cost_multiplier"], current_level))
+		return Big.new(0)
+	var base: Big = Big.new(upgrade["base_cost"])
+	return base.multiply(pow(upgrade["cost_multiplier"], current_level))
 
 
-func get_rabbit_hire_cost(owned_count: int) -> int:
+func get_rabbit_hire_cost(owned_count: int) -> Big:
 	if owned_count < rabbit_hire_costs.size():
-		return rabbit_hire_costs[owned_count]
+		return Big.new(rabbit_hire_costs[owned_count])
 	# Scale beyond the defined array
-	return int(rabbit_hire_costs[-1] * pow(2.0, owned_count - rabbit_hire_costs.size() + 1))
+	var base: Big = Big.new(rabbit_hire_costs[-1])
+	return base.multiply(pow(2.0, owned_count - rabbit_hire_costs.size() + 1))

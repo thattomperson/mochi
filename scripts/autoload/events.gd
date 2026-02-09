@@ -7,10 +7,10 @@ extends Node
 signal mochi_produced(mochi_type: int, amount: int)
 
 # -- Sales --
-signal mochi_sold(mochi_type: int, amount: int, coins_earned: float)
+signal mochi_sold(mochi_type: int, amount: int, coins_earned: Big)
 
 # -- Economy --
-signal coins_changed(new_total: float)
+signal coins_changed(new_total: Big)
 
 # -- Upgrades --
 signal upgrade_purchased(upgrade_id: String, new_level: int)
