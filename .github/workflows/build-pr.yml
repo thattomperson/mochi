@@ -68,9 +68,65 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  export-android:
+    name: Export Android
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - name: Setup export templates
+        run: |
+          mkdir -p /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable/* \
+            /github/home/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+ 
+      - name: Setup Android SDK and keystore
+        run: |
+          # Create debug keystore for signing
+          mkdir -p /github/home/.android
+          keytool -genkey -v \
+            -keystore /github/home/.android/debug.keystore \
+            -storepass android \
+            -alias androiddebugkey \
+            -keypass android \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -noprompt
+          # Configure Godot editor settings for Android export
+          mkdir -p /github/home/.config/godot
+          cat > /github/home/.config/godot/editor_settings-4.tres <<EOFSET
+          [gd_resource type="EditorSettings" format=3]
+ 
+          [resource]
+          export/android/android_sdk_path = "/usr/lib/android-sdk"
+          export/android/debug_keystore = "/github/home/.android/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOFSET
+ 
+      - name: Import project
+        run: godot --headless --import 2>&1 || true
+        timeout-minutes: 2
+ 
+      - name: Export Android build
+        run: |
+          mkdir -p build/android
+          godot --headless --verbose --export-release "Android" build/android/mochi.apk
+ 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mochi-android
+          path: build/android/
+          if-no-files-found: error
+          retention-days: 14
+
   comment-pr:
     name: Comment on PR
-    needs: [export-linux, export-web]
+    needs: [export-linux, export-web, export-android]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -89,6 +145,7 @@ jobs:
               `|----------|----------|`,
               `| Linux x86_64 | [mochi-linux](${runUrl}#artifacts) |`,
               `| Web (HTML5) | [mochi-web](${runUrl}#artifacts) |`,
+              `| Android APK | [mochi-android](${runUrl}#artifacts) |`,
               ``,
               `> Artifacts are available for 14 days. Download from the [workflow run page](${runUrl}).`,
             ].join('\n');
