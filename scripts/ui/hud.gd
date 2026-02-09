@@ -22,7 +22,7 @@ func _ready() -> void:
 	_update_all()
 
 
-func _on_coins_changed(_new_total: Big) -> void:
+func _on_coins_changed(_new_total: int) -> void:
 	_update_all()
 
 
@@ -31,7 +31,7 @@ func _on_mochi_produced(_type: int, _amount: int) -> void:
 	_update_sell_button()
 
 
-func _on_mochi_sold(_type: int, _amount: int, _coins: Big) -> void:
+func _on_mochi_sold(_type: int, _amount: int, _coins: int) -> void:
 	_update_all()
 
 
@@ -48,7 +48,7 @@ func _on_sell_pressed() -> void:
 
 
 func _on_hire_pressed() -> void:
-	var cost: Big = GameData.get_rabbit_hire_cost(PlayerData.rabbits.size())
+	var cost: int = GameData.get_rabbit_hire_cost(PlayerData.rabbits.size())
 	if PlayerData.spend_coins(cost):
 		var rabbit_id: int = PlayerData.add_rabbit(Globals.RabbitRole.WORKER)
 		# Assign to first station by default
@@ -75,9 +75,16 @@ func _on_upgrade_pressed(upgrade_id: String) -> void:
 		return
 	if current_level >= upgrade["max_level"]:
 		return
-	var cost: Big = GameData.get_upgrade_cost(upgrade_id, current_level)
+	var cost: int = GameData.get_upgrade_cost(upgrade_id, current_level)
 	if PlayerData.spend_coins(cost):
 		PlayerData.set_upgrade_level(upgrade_id, current_level + 1)
+
+
+## Format an internal coin value for display (divide by COIN_SCALE).
+static func format_coins(amount: int) -> String:
+	var whole: int = amount / Globals.COIN_SCALE
+	var frac: int = absi(amount % Globals.COIN_SCALE)
+	return "%d.%02d" % [whole, frac]
 
 
 func _update_all() -> void:
@@ -89,7 +96,7 @@ func _update_all() -> void:
 
 
 func _update_coins_display() -> void:
-	coins_label.text = "Coins: %s" % PlayerData.coins.toAA()
+	coins_label.text = "Coins: %s" % format_coins(PlayerData.coins)
 
 
 func _update_mochi_display() -> void:
@@ -99,8 +106,8 @@ func _update_mochi_display() -> void:
 		for mochi_type in PlayerData.mochi_inventory.keys():
 			var recipe: Dictionary = GameData.get_recipe(mochi_type)
 			var mochi_name: String = recipe.get("name", "???")
-			var sell_value: Big = GameManager.get_mochi_sell_value(mochi_type)
-			parts.append("%s: %d (%s ea)" % [mochi_name, PlayerData.mochi_inventory[mochi_type], sell_value.toAA()])
+			var sell_value: int = GameManager.get_mochi_sell_value(mochi_type)
+			parts.append("%s: %d (%s ea)" % [mochi_name, PlayerData.mochi_inventory[mochi_type], format_coins(sell_value)])
 		mochi_label.text = "Mochi: " + ", ".join(parts)
 	else:
 		mochi_label.text = "Mochi: 0"
@@ -111,11 +118,11 @@ func _update_sell_button() -> void:
 	var has_auto_sell: bool = 3 in PlayerData.milestones_reached
 	sell_button.visible = not has_auto_sell
 	if total > 0:
-		var total_value: Big = Big.new(0)
+		var total_value: int = 0
 		for mochi_type in PlayerData.mochi_inventory.keys():
 			var count: int = PlayerData.mochi_inventory[mochi_type]
-			total_value = total_value.plus(GameManager.get_mochi_sell_value(mochi_type).multiply(count))
-		sell_button.text = "Sell All (%d - %s coins)" % [total, total_value.toAA()]
+			total_value += GameManager.get_mochi_sell_value(mochi_type) * count
+		sell_button.text = "Sell All (%d - %s coins)" % [total, format_coins(total_value)]
 		sell_button.disabled = false
 	else:
 		sell_button.text = "Sell (nothing)"
@@ -134,12 +141,12 @@ func _update_upgrade_buttons() -> void:
 			btn.text = "%s (MAX)" % upgrade["name"]
 			btn.disabled = true
 		else:
-			var cost: Big = GameData.get_upgrade_cost(upgrade_id, current_level)
-			btn.text = "%s Lv%d (%s coins)" % [upgrade["name"], current_level + 1, cost.toAA()]
-			btn.disabled = PlayerData.coins.isLessThan(cost)
+			var cost: int = GameData.get_upgrade_cost(upgrade_id, current_level)
+			btn.text = "%s Lv%d (%s coins)" % [upgrade["name"], current_level + 1, format_coins(cost)]
+			btn.disabled = PlayerData.coins < cost
 
 
 func _update_hire_button() -> void:
-	var cost: Big = GameData.get_rabbit_hire_cost(PlayerData.rabbits.size())
-	hire_button.text = "Hire Rabbit (%s coins)" % cost.toAA()
-	hire_button.disabled = PlayerData.coins.isLessThan(cost)
+	var cost: int = GameData.get_rabbit_hire_cost(PlayerData.rabbits.size())
+	hire_button.text = "Hire Rabbit (%s coins)" % format_coins(cost)
+	hire_button.disabled = PlayerData.coins < cost

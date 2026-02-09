@@ -42,31 +42,31 @@ func _try_auto_sell() -> void:
 		var recipe: Dictionary = GameData.get_recipe(mochi_type)
 		if recipe.is_empty():
 			continue
-		var coins: Big = get_mochi_sell_value(mochi_type).multiply(count)
+		var coins: int = get_mochi_sell_value(mochi_type) * count
 		PlayerData.remove_mochi(mochi_type, count)
 		PlayerData.add_coins(coins)
 		Events.mochi_sold.emit(mochi_type, count, coins)
 
 
-func sell_all_mochi() -> Big:
-	var total_coins: Big = Big.new(0)
+func sell_all_mochi() -> int:
+	var total_coins: int = 0
 	for mochi_type in PlayerData.mochi_inventory.keys():
 		var count: int = PlayerData.mochi_inventory[mochi_type]
 		if count <= 0:
 			continue
-		var coins: Big = get_mochi_sell_value(mochi_type).multiply(count)
+		var coins: int = get_mochi_sell_value(mochi_type) * count
 		PlayerData.remove_mochi(mochi_type, count)
 		PlayerData.add_coins(coins)
 		Events.mochi_sold.emit(mochi_type, count, coins)
-		total_coins = total_coins.plus(coins)
+		total_coins += coins
 	return total_coins
 
 
-func get_mochi_sell_value(mochi_type: int) -> Big:
+func get_mochi_sell_value(mochi_type: int) -> int:
 	var recipe: Dictionary = GameData.get_recipe(mochi_type)
 	if recipe.is_empty():
-		return Big.new(0)
-	var base_value: Big = Big.new(recipe["value"])
+		return 0
+	var base_value: int = recipe["value"]
 	var value_level: int = PlayerData.get_upgrade_level("mochi_value")
 	var value_mult: float = 1.0 + value_level * GameData.get_upgrade("mochi_value").get("effect_per_level", 0.0)
-	return base_value.multiply(value_mult)
+	return int(base_value * value_mult)
