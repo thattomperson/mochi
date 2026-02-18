@@ -29,6 +29,7 @@ enum Era {
 
 # -- Constants --
 
+const COIN_SCALE: int = 100  # 100 internal units = 1 displayed coin
 const TICK_INTERVAL: float = 1.0  # Seconds between production ticks
 const SAVE_INTERVAL: float = 30.0  # Seconds between auto-saves
 const STARTING_COINS: int = 0

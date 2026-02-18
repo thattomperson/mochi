@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/game/mochi_station.gd" id="1_station"]
+
+[node name="MochiStation" type="Node2D"]
+script = ExtResource("1_station")
+
+[node name="Background" type="ColorRect" parent="."]
+offset_left = -60.0
+offset_top = -60.0
+offset_right = 60.0
+offset_bottom = 60.0
+color = Color(0.6, 0.45, 0.3, 1)
+
+[node name="StationLabel" type="Label" parent="."]
+offset_left = -55.0
+offset_top = -50.0
+offset_right = 55.0
+offset_bottom = 50.0
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Station 1
+0 rabbit(s)"

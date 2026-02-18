@@ -2,6 +2,9 @@ extends Node
 
 ## Runtime player state. Tracks everything the player owns and has earned.
 ## Not persisted yet — save/load comes in Phase 3.
+##
+## Coins are stored as fixed-point ints: 100 units = 1 displayed coin.
+## Use Globals.COIN_SCALE for conversions.
 
 var coins: int = Globals.STARTING_COINS
 var current_era: int = Globals.STARTING_ERA
